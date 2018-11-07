@@ -324,13 +324,7 @@ int main()
         }
         // cout<<endl;
 
-        
-     
-       
     }
-
-
-
 
     //actual logic of kruskal to find the weight of MST using union operation
     cout<<kruskal(new_e,g_edges,g_nodes)<<endl;

@@ -26,11 +26,11 @@ struct Node_Fibonacci
     Node_Fibonacci *forward;
     Node_Fibonacci *parent;
     Node_Fibonacci *child;
-    int key;
-    int from;
-    int to;
+    lld key;
+    lld from;
+    lld to;
     bool marked;
-    int degree;
+    lld degree;
 
     Node_Fibonacci()
     {
@@ -45,7 +45,7 @@ struct Node_Fibonacci
         this -> degree = 0;
     }
     
-    Node_Fibonacci(int key,int f,int t)
+    Node_Fibonacci(lld key,lld f,lld t)
     {
         this -> key = key;
         this -> from = f;
@@ -62,7 +62,7 @@ struct Node_Fibonacci
 class Heap
 {
     Node_Fibonacci *min;
-    int N;
+    lld N;
     
 public:
     Heap();
@@ -72,7 +72,7 @@ public:
     void merge(Heap*);
     Node_Fibonacci* first();
     Node_Fibonacci* extractMin();
-    void decreaseKey(Node_Fibonacci*, int);
+    void decreaseKey(Node_Fibonacci*, lld);
     void Delete(Node_Fibonacci*);
 };
 
@@ -183,10 +183,10 @@ Node_Fibonacci* Heap::extractMin()
     
     if (this -> min != NULL)
     {
-        int max_degree = 0;
-        int size_of_aux_arr = 5 * (((int)log2(this -> N + 1)) + 1);
+        lld max_degree = 0;
+        lld size_of_aux_arr = 5 * (((lld)log2(this -> N + 1)) + 1);
         Node_Fibonacci *aux_arr[size_of_aux_arr + 1];
-        int k=size_of_aux_arr;
+        lld k=size_of_aux_arr;
         while(k>=0){
              aux_arr[k] = NULL;
              k--;
@@ -198,7 +198,7 @@ Node_Fibonacci* Heap::extractMin()
         {   
             //traversing all the children of the removed minimum node...
             Node_Fibonacci *next_node = current_node -> forward;
-            int degree = current_node -> degree;
+            lld degree = current_node -> degree;
             Node_Fibonacci *node1 = current_node;
           
             if(aux_arr[degree] != NULL)
@@ -242,7 +242,7 @@ Node_Fibonacci* Heap::extractMin()
         
         Node_Fibonacci *previous = aux_arr[max_degree];
         this -> min = previous;
-        for (int i=0;i<=max_degree;i++)
+        for (lld i=0;i<=max_degree;i++)
         {
             if (aux_arr[i] != NULL)
             {
@@ -265,20 +265,23 @@ int main()
     //implmentation of Kruskal's algorithm using fibonacci heap........
     Heap *fh = new Heap();
 
-    int g_nodes;
-    int g_edges;
+    lld g_nodes;
+    lld g_edges;
 
     cin >> g_nodes >> g_edges;
     
 
-    vector<int> g_from(g_edges);
-    vector<int> g_to(g_edges);
-    vector<int> g_weight(g_edges);
-    multimap<int,pair<int,int>>map_of_edge;
+    vector<lld> g_from(g_edges);
+    vector<lld> g_to(g_edges);
+    vector<lld> g_weight(g_edges);
+    //unordered_map<int,pair<int,int>>edge_node_map;
+    // multimap<int,edges>map_of_edge;
+    multimap<lld,pair<lld,lld>>map_of_edge;
+    //unoredered_map<int,int>temp_map;
     
 
     
-    for (int i = 0; i < g_edges; i++) {
+    for (lld i = 0; i < g_edges; i++) {
         
         cin >> g_from[i] >> g_to[i] >> g_weight[i];
         
@@ -286,7 +289,7 @@ int main()
             fh -> insert(new Node_Fibonacci(g_weight[i],g_from[i],g_to[i]));
         }
         //inserting the weight in the temporary unoredered map if it's the first time this edge is encountered else inserting the multimap to handle duplicates
-        pair<int,int>from_to = make_pair(g_from[i],g_to[i]);
+        pair<lld,lld>from_to = make_pair(g_from[i],g_to[i]);
         map_of_edge.insert({g_weight[i], from_to});
        // map_of_edge.insert({g_weight[i],new_e});
         
@@ -294,7 +297,7 @@ int main()
        
     }
     
-    multimap<int,pair<int,int>>::iterator mul_itr;
+    multimap<lld,pair<lld,lld>>::iterator mul_itr;
     // checking the insertion in multimap-----------------------------------------------------
     // for(mul_itr=map_of_edge.begin();mul_itr!=map_of_edge.end();++mul_itr){
 
@@ -304,18 +307,18 @@ int main()
     //----------------------------------------------------------------------------------------
 
     //sorting using the extract minimum operation of fibonacci heap..
-    int y=0;
+    lld y=0;
     struct edges new_e[g_edges+1];
     while (!fh -> is_Heap_Empty())
     {
-        int x =  fh -> extractMin() -> key;
+        lld x =  fh -> extractMin() -> key;
 
         
         //sorting the structure of graph nodes along with handling the duplicates------------------------------------------------
-        pair<multimap<int,pair<int,int>>::iterator,multimap<int,pair<int,int>>::iterator> ret;
+        pair<multimap<lld,pair<lld,lld>>::iterator,multimap<lld,pair<lld,lld>>::iterator> ret;
         ret = map_of_edge.equal_range(x);
         
-        for(multimap<int,pair<int,int>>::iterator it=ret.first;it!=ret.second;++it){
+        for(multimap<lld,pair<lld,lld>>::iterator it=ret.first;it!=ret.second;++it){
             new_e[y].weight = x;
             new_e[y].from = (it->second).first;
             new_e[y].to = (it->second).second;
@@ -324,7 +327,13 @@ int main()
         }
         // cout<<endl;
 
+        
+     
+       
     }
+
+
+
 
     //actual logic of kruskal to find the weight of MST using union operation
     cout<<kruskal(new_e,g_edges,g_nodes)<<endl;

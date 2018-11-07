@@ -2,11 +2,11 @@
 //Kruskal (MST): Really Special Subtree - HACKERRANK
 //Problem statement - https://www.hackerrank.com/challenges/kruskalmstrsub/problem - equivalent to kruskal except that same length ede cant be included twice.
 #include "kruskal.hpp"
-int parent[100000000];
-int ranking[100000000];
+lld parent[100000000];
+lld ranking[100000000];
 
-void initialize(int n){
-    for(int i=1;i<=n;i++){
+void initialize(lld n){
+    for(lld i=1;i<=n;i++){
         // parent.push_back(i);
         // ranking.push_back(0);
         parent[i]=i;
@@ -21,8 +21,8 @@ bool compare(struct edges a,struct edges b){
     else if(b.weight<a.weight)
         return false;
     else{
-        int x = a.weight + a.from + a.to;
-        int y = b.weight + b.from + b.to;
+        lld x = a.weight + a.from + a.to;
+        lld y = b.weight + b.from + b.to;
             
         if(x<y)
             return true;
@@ -33,8 +33,8 @@ bool compare(struct edges a,struct edges b){
 }
 
 
-int find(int x){
-    int u;
+lld find(lld x){
+    lld u;
     if(parent[x]==x)
         return x;
     else 
@@ -42,7 +42,7 @@ int find(int x){
 }
 
 
-void union1(int a,int b){
+void union1(lld a,lld b){
     a=find(a);
     b=find(b);
     
@@ -68,20 +68,23 @@ void union1(int a,int b){
 
 
 
-int kruskal(struct edges *e,int g_edges,int g_nodes)
+lld kruskal(struct edges *e,lld g_edges,lld g_nodes)
 {
 
+
+    // for (lld i=0;i<g_edges;i++){
+    //     cout<<e[i].weight<<" ";
+    // }
+    // cout<<endl;
     initialize(g_nodes);
     //sort(e,e+g_edges,compare);
-    int mst_wt=0;
-    for(int i=0;i<g_edges;i++){
-        int u = e[i].from;
-        int v = e[i].to;
+    lld mst_wt=0;
+    for(lld i=0;i<g_edges;i++){
+        lld u = e[i].from;
+        lld v = e[i].to;
 
-        u = parent[u];
-        v = parent[v];
-        parent[e[i].from]=u;
-        parent[e[i].to]=v;
+        u = find(u);
+        v = find(v);
         
         if(u!=v){
            mst_wt+=e[i].weight;

@@ -273,7 +273,8 @@ int main()
     multimap<int,pair<int,int>>map_of_edge;
 
 
-    
+    clock_t t;
+    t=clock();
     for (int i = 0; i < g_edges; i++) {
         
         cin >> g_from[i] >> g_to[i] >> g_weight[i];
@@ -294,9 +295,6 @@ int main()
 
     int y=0;
     struct edges new_e[g_edges+1];
-
-    clock_t t;
-    t=clock();
     while (!bh -> isEmpty())
     {
         int x = bh -> extractMin() -> key;

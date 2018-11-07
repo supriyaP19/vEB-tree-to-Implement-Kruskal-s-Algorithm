@@ -282,6 +282,8 @@ int main()
     //unoredered_map<int,int>temp_map;
     
 
+    clock_t t;
+    t=clock();
 
     for (lld i = 0; i < g_edges; i++) {
         
@@ -311,9 +313,6 @@ int main()
     //sorting using the extract minimum operation of fibonacci heap..
     lld y=0;
     struct edges new_e[g_edges+1];
-    
-    clock_t t;
-    t=clock();
     while (!fh -> is_Heap_Empty())
     {
         lld x =  fh -> extractMin() -> key;

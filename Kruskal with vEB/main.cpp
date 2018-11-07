@@ -12,8 +12,11 @@ int main()
     //implmentation of Kruskal's algorithm using vEB tree........
    
     // Heap *fh = new Heap();
-
-    vEB * vebtree = new vEB (100000);
+    ll N;
+    cout<<"enter the max range of edges: ";
+    cin>>N;
+    srand(time(0));
+    vEB * vebtree = new vEB (N);
 
     ll g_nodes;
     ll g_edges;
@@ -56,6 +59,8 @@ int main()
     //sorting using the extract minimum operation of fibonacci heap..
     ll y=0;
     struct edges new_e[g_edges+1];
+    clock_t t;
+    t=clock();
     while (tree_min(vebtree))
     {
         ll x =  extract_min(vebtree) -> weight;
@@ -84,7 +89,10 @@ int main()
 
     //actual logic of kruskal to find the weight of MST using union operation
     cout<<kruskal(new_e,g_edges,g_nodes)<<endl;
+    t=clock()-t;
 
+    double time_taken1 = ((double) t) / CLOCKS_PER_SEC;
+    cout<<(fixed)<<"time taken is : "<<time_taken1<<endl;
    
     return 0;
 }

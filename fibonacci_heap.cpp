@@ -12,6 +12,7 @@
 #include <stack>
 #include <set>
 #include <map>
+#include<time.h>
 #include <complex>
 #include "kruskal.hpp"
 #define INF 999999999
@@ -262,6 +263,7 @@ Node_Fibonacci* Heap::extractMin()
 
 int main()
 {
+    srand(time(0));
     //implmentation of Kruskal's algorithm using fibonacci heap........
     Heap *fh = new Heap();
 
@@ -280,7 +282,9 @@ int main()
     //unoredered_map<int,int>temp_map;
     
 
-    
+    clock_t t;
+    t=clock();
+
     for (lld i = 0; i < g_edges; i++) {
         
         cin >> g_from[i] >> g_to[i] >> g_weight[i];
@@ -337,7 +341,10 @@ int main()
 
     //actual logic of kruskal to find the weight of MST using union operation
     cout<<kruskal(new_e,g_edges,g_nodes)<<endl;
+    t=clock()-t;
 
+    double time_taken1 = ((double) t) / CLOCKS_PER_SEC;
+    cout<<(fixed)<<"time taken is : "<<time_taken1<<endl;
    
     return 0;
 }

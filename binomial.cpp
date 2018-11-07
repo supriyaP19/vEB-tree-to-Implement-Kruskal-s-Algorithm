@@ -247,7 +247,7 @@ void BinHeap::Delete(BinNode *x)
 }
 
 int main()
-{
+{    srand(time(0));
     BinHeap *bh = new BinHeap();
     
     // BinNode *x = new BinNode(11);
@@ -272,6 +272,9 @@ int main()
     vector<int> g_weight(g_edges);
     multimap<int,pair<int,int>>map_of_edge;
 
+
+    clock_t t;
+    t=clock();
     for (int i = 0; i < g_edges; i++) {
         
         cin >> g_from[i] >> g_to[i] >> g_weight[i];
@@ -312,6 +315,9 @@ int main()
     
     //actual logic of kruskal to find the weight of MST using union operation
     cout<<kruskal(new_e,g_edges,g_nodes)<<endl;
+    t=clock()-t;
 
+    double time_taken1 = ((double) t) / CLOCKS_PER_SEC;
+    cout<<(fixed)<<"time taken is : "<<time_taken1<<endl;
     return 0;
 }

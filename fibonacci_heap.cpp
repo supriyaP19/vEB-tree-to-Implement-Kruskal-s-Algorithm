@@ -13,63 +13,11 @@
 #include <set>
 #include <map>
 #include <complex>
+#include "kruskal.hpp"
 #define INF 999999999
 using namespace std;
 typedef long long lld;
 typedef unsigned long long llu;
-
-int parent[100000000];
-int ranking[100000000];
-
-
-struct edges{
-    int from;
-    int to;
-    int weight;
-};
-
-void initialize(int n){
-    for(int i=1;i<=n;i++){
-        // parent.push_back(i);
-        // ranking.push_back(0);
-        parent[i]=i;
-
-        ranking[i]=0;
-    }
-}
-
-
-int find(int x){
-    int u;
-    if(parent[x]==x)
-        return x;
-    else 
-        return parent[x]=find(parent[x]);
-}
-
-
-void union1(int a,int b){
-    a=find(a);
-    b=find(b);
-    
-    if(ranking[a]==ranking[b]){
-
-        parent[a]=b;
-        ranking[b]++;
-    
-    }
-    else if(ranking[a]>ranking[b]){
-        parent[b]=a;
-        ranking[a]++;
-        
-    }
-    else{
-        parent[a]=b;
-        ranking[b]++;
-    }
-
-}
-
 
 struct Node_Fibonacci
 {
@@ -79,6 +27,8 @@ struct Node_Fibonacci
     Node_Fibonacci *parent;
     Node_Fibonacci *child;
     int key;
+    int from;
+    int to;
     bool marked;
     int degree;
 
@@ -89,13 +39,17 @@ struct Node_Fibonacci
         this -> parent =NULL;
         this -> child = NULL;
         this -> key = 0;
+        this -> from = 0;
+        this -> to = 0;
         this -> marked = false;
         this -> degree = 0;
     }
     
-    Node_Fibonacci(int key)
+    Node_Fibonacci(int key,int f,int t)
     {
         this -> key = key;
+        this -> from = f;
+        this -> to =t;
         this -> marked = false;
         this -> degree = 0;
         this -> backward =NULL;
@@ -320,57 +274,67 @@ int main()
     vector<int> g_from(g_edges);
     vector<int> g_to(g_edges);
     vector<int> g_weight(g_edges);
-    unordered_map<int,pair<int,int>>edge_node_map;
+    multimap<int,pair<int,int>>map_of_edge;
+    
 
-    initialize(g_nodes);
-
+    
     for (int i = 0; i < g_edges; i++) {
         
         cin >> g_from[i] >> g_to[i] >> g_weight[i];
-        fh -> insert(new Node_Fibonacci(g_weight[i]));
+        
+        if(map_of_edge.find(g_weight[i])==map_of_edge.end()){
+            fh -> insert(new Node_Fibonacci(g_weight[i],g_from[i],g_to[i]));
+        }
+        //inserting the weight in the temporary unoredered map if it's the first time this edge is encountered else inserting the multimap to handle duplicates
+        pair<int,int>from_to = make_pair(g_from[i],g_to[i]);
+        map_of_edge.insert({g_weight[i], from_to});
+       // map_of_edge.insert({g_weight[i],new_e});
+        
         
        
     }
     
-    // adding from-to pair to map corresponding to the index equal to the weight
-    for(int i=0;i<g_edges;i++){
+    multimap<int,pair<int,int>>::iterator mul_itr;
+    // checking the insertion in multimap-----------------------------------------------------
+    // for(mul_itr=map_of_edge.begin();mul_itr!=map_of_edge.end();++mul_itr){
 
-        pair<int,int>from_to = make_pair(g_from[i],g_to[i]);
-        edge_node_map[g_weight[i]]=from_to;
-    }
-    
+    //     cout<<" weight: "<<mul_itr->first<<" ";
+    //     cout<<" u and v: "<<(mul_itr->second).first<<","<<(mul_itr->second).second<<endl;
+    // }
+    //----------------------------------------------------------------------------------------
+
     //sorting using the extract minimum operation of fibonacci heap..
     int y=0;
     struct edges new_e[g_edges+1];
     while (!fh -> is_Heap_Empty())
     {
         int x =  fh -> extractMin() -> key;
-        new_e[y].from=(edge_node_map[x]).first;
-        new_e[y].to=(edge_node_map[x]).second;
-        new_e[y].weight = x;
-        printf("%d ",x);
-        y++;
-    }
 
-    // actual logic of kruskal to find the weight of MST using union operation
-    printf("\n");
-    int mst_wt=0;
-    for(int i=0;i<g_edges;i++){
-        int u = new_e[i].from;
-        int v = new_e[i].to;
-
-        u = parent[u];
-        v = parent[v];
-        parent[new_e[i].from]=u;
-        parent[new_e[i].to]=v;
         
-        if(u!=v){
-           mst_wt+=new_e[i].weight;
+        //sorting the structure of graph nodes along with handling the duplicates------------------------------------------------
+        pair<multimap<int,pair<int,int>>::iterator,multimap<int,pair<int,int>>::iterator> ret;
+        ret = map_of_edge.equal_range(x);
+        
+        for(multimap<int,pair<int,int>>::iterator it=ret.first;it!=ret.second;++it){
+            new_e[y].weight = x;
+            new_e[y].from = (it->second).first;
+            new_e[y].to = (it->second).second;
+            y++;
+            // cout<<" ("<<(it->second).first<<","<<(it->second).second<<")";
+        }
+        // cout<<endl;
 
-           union1(u,v);
-        }       
+        
+     
+       
     }
-    cout<<mst_wt<<endl;
+
+
+
+
+    //actual logic of kruskal to find the weight of MST using union operation
+    cout<<kruskal(new_e,g_edges,g_nodes)<<endl;
+
    
     return 0;
 }

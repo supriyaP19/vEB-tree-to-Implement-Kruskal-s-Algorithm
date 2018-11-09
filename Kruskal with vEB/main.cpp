@@ -10,8 +10,7 @@ using namespace std;
 int main()
 {
     //implmentation of Kruskal's algorithm using vEB tree........
-   
-    // Heap *fh = new Heap();
+
     ll N;
     cout<<"enter the max range of edges: ";
     cin>>N;
@@ -38,10 +37,8 @@ int main()
         if(map_of_edge.find(g_weight[i])==map_of_edge.end()){
             insert(vebtree, g_weight[i], g_from[i], g_to[i]);
         }
-        //inserting the weight in the temporary unoredered map if it's the first time this edge is encountered else inserting the multimap to handle duplicates
         pair<ll,ll>from_to = make_pair(g_from[i],g_to[i]);
         map_of_edge.insert({g_weight[i], from_to});
-       // map_of_edge.insert({g_weight[i],new_e});
         
         
        

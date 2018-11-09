@@ -1,12 +1,13 @@
+
 //
-//  veb.cpp
+//  vEB.cpp
 //  APS project 1
 //
 //  Created by Rajat Kumar Verma on 31/10/18.
 //  Copyright © 2018 APS. All rights reserved.
 //
 
-#include "veb.hpp"
+#include "vEB.hpp"
 
 
 
@@ -17,33 +18,25 @@ edge::edge(ll wt , ll frm , ll t )
     to = t;
 }
 
-vEB::vEB ( ll uniSize )
+vEB::vEB(ll universe_size)
 {
-    
-    uni = powTwoRoundUp ( uniSize );
-    uniSqrt = sqrt ( uni );
-    lowerUniSqrt = lowerSqrt ( uni );
-    higherUniSqrt = higherSqrt ( uni );
-    
-    //    min = new edge();
-    //
-    //    max = new edge();
-    
     min = NULL;
     max = NULL;
-    
     summary = NULL;
     cluster = NULL;
-    if ( uniSize <= 0 )
+    if(universe_size <= 0)
     {
-        std::cerr << "universe size of vEB must be bigger than 0" << std::endl;
         return;
     }
-    
-    if ( uni > 2 )
+    universe = nextpower_of_two(universe_size);
+    universe_sqrt = sqrt(universe);
+    low_universe_sqrt = sqrt_floor(universe);
+    hi_universe_sqrt = sqrt_ceil(universe);
+
+    if (universe > 2)
     {
-        cluster = new vEB * [higherUniSqrt];
-        for ( ll i = 0; i < higherUniSqrt; ++i )
+        cluster = new vEB * [hi_universe_sqrt];
+        for (ll i = 0; i < hi_universe_sqrt; ++i)
         {
             cluster[i] = NULL;
         }
@@ -56,54 +49,56 @@ vEB::vEB ( ll uniSize )
 
 vEB::~vEB()
 {
-    //    if(min) delete min;
-    //    if(max) delete max;
-    if ( summary ) delete summary;
-    if ( cluster )
+    if(cluster != NULL)
     {
-        for ( ll i = 0; i < higherUniSqrt; ++i )
+        for(ll i = 0; i < hi_universe_sqrt; i++)
         {
-            if ( cluster[i] ) delete cluster[i];
+            if(cluster[i] != NULL) 
+            delete cluster[i];
         }
         delete [] cluster;
     }
+    if(summary != NULL) 
+    delete summary;
 }
 
-ll powTwoRoundUp ( ll x )
+ll nextpower_of_two(ll next_exp)
 {
-    if ( x < 0 ) return 0;
-    --x;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    return x + 1;
+    if (next_exp < 0)
+        return 0;
+    next_exp--;
+    next_exp |= next_exp >> 1;
+    next_exp |= next_exp >> 2;
+    next_exp |= next_exp >> 4;
+    next_exp |= next_exp >> 8;
+    next_exp |= next_exp >> 16;
+    next_exp++;
+    return next_exp;
 }
 
-float lowerSqrt ( ll val )
+ll sqrt_floor(ll x)
 {
-    return pow ( 2, floor ( log2 ( val )  / 2 ) );
+    return pow(2, floor(log2(x)/2));
 }
 
-float higherSqrt ( ll val )
+ll sqrt_ceil(ll x)
 {
-    return pow ( 2, ceil ( log2 ( val )  / 2 ) );
+    return pow(2, ceil(log2(x)/2));
 }
 
-ll low ( vEB * tree, ll val )
+ll low(vEB * tree, ll x)
 {
-    return val % ( ll ) lowerSqrt ( tree->uni );
+    return x%(ll)sqrt_floor(tree->universe);
 }
 
-ll high ( vEB * tree, ll val )
+ll high(vEB * tree, ll x)
 {
-    return val / lowerSqrt ( tree->uni );
+    return x/sqrt_floor(tree->universe);
 }
 
-ll index ( vEB * tree, ll high, ll low )
+ll index (vEB * tree, ll high, ll low)
 {
-    return high * lowerSqrt ( tree->uni ) + low;
+    return high * sqrt_floor(tree->universe) + low;
 }
 
 
@@ -134,117 +129,116 @@ struct edge * extract_min(vEB *tree)
 
     if(x != NULL)
     {
-        vEB_delete ( tree, x->weight);
+        delete_vEB(tree, x->weight);
         return y;
     }
-    cout << "Could not delete ll_MIN !!"<<endl;
+    // cout << "Could not delete ll_MIN !!"<<endl;
     return x;
 }
 
 struct vEB * empty_insert_mem(ll size)
 {
-    struct vEB *tree = new vEB ( size );
+    struct vEB *tree = new vEB(size);
     return tree;
 }
 
-struct vEB * empty_insert(vEB *& tree, struct edge *val)
+struct vEB * empty_insert(vEB *& tree, struct edge *ed)
 {
-    tree->min = tree->max = val;
+    tree->min = tree->max = ed;
     return tree;
 }
 
-struct vEB * set_new_min(vEB *& tree,  struct edge *oldstr)
+struct vEB * set_new_min(vEB *& tree,  struct edge *new_min)
 {
-    tree->min = oldstr;
+    tree->min = new_min;
     return tree;
 }
 
 
-ll insert(vEB *& tree ,ll wt, ll frm , ll t, ll parenrUniSqrt)
+ll insert(vEB *& tree ,ll wt, ll frm , ll t, ll last_universe_sqrt)
 {
-    struct edge *x = new edge(wt , frm , t);
+    struct edge *ed = new edge(wt , frm , t);
     
-    vEB_insert(tree , x , parenrUniSqrt );
+    insert_vEB(tree , ed , last_universe_sqrt);
     return 1;
 }
 
 
 
-ll vEB_insert ( vEB *& tree, struct edge *val, ll parentUniSqrt )
+ll insert_vEB(vEB *& tree, struct edge *ed, ll last_universe_sqrt)
 {
     if ( !tree )
     {
-        tree = empty_insert_mem(parentUniSqrt);
+        tree = empty_insert_mem(last_universe_sqrt);
     }
-    if ( tree_min(tree) == NULL )
+    if(tree_min(tree) == NULL)
     {
-        empty_insert(tree , val);
+        empty_insert(tree , ed);
         return 1;
     }
     
-    if ( val->weight < 0 || val->weight >= tree->uni )
+    if(ed->weight < 0 || ed->weight >= tree->universe)
     {
         return 0;
     }
-    if ( tree_min(tree)->weight == val->weight || tree_max(tree)->weight == val->weight )
+    if(tree_min(tree)->weight == ed->weight || tree_max(tree)->weight == ed->weight)
     {
         return 0;
     }
     
     
-    if ( val->weight < tree_min(tree)->weight )
+    if(ed->weight < tree_min(tree)->weight)
     {
-        struct edge *oldstr = val;
-        
-        val = tree->min;
-        set_new_min(tree , oldstr);
+        struct edge *new_min = ed;
+        ed = tree->min;
+        set_new_min(tree , new_min);
     }
     
-    if ( tree->uni > 2 )
+    if(tree->universe > 2)
     {
-        ll lowVal = low ( tree, val->weight );
-        ll highVal = high ( tree, val->weight );
-        if ( tree_min(tree->cluster[highVal]) == NULL )
+        ll low_of_x = low ( tree, ed->weight );
+        ll high_of_x = high ( tree, ed->weight );
+        if(tree_min(tree->cluster[high_of_x]) == NULL)
         {
-            if ( insert ( tree->summary, highVal , val->from, val->to , tree->higherUniSqrt )== 0 )
+            if (insert(tree->summary, high_of_x , ed->from, ed->to , tree->hi_universe_sqrt)== 0)
             {
                 return 0;
             }
         }
         
-        if ( insert ( tree->cluster[highVal], lowVal, val->from , val->to , tree->lowerUniSqrt )== 0 )
+        if (insert(tree->cluster[high_of_x], low_of_x, ed->from , ed->to , tree->low_universe_sqrt)== 0)
         {
             return 0;
         }
     }
-    if ( val->weight > tree_max(tree)->weight )
+    if (ed->weight > tree_max(tree)->weight)
     {
-        tree->max = val ;
+        tree->max = ed ;
     }
     return 1;
 }
 
-ll vEB_delete ( vEB *& tree, ll val )
+ll delete_vEB(vEB *& tree, ll ed)
 {
     if ( !tree )
     {
         return 0;
     }
-    if ( val < 0 || val >= tree->uni )
+    if(ed < 0 || tree->universe <= ed)
     {
         return 0;
     }
-    if ( val < tree->min->weight || tree->max->weight < val )
+    if(ed < tree->min->weight || tree->max->weight < ed)
     {
         return 0;
     }
-    if ( val == tree->min->weight )
+    if(ed == tree->min->weight)
     {
         
-        struct edge *x = tree_min ( tree->summary);
-        if ( x == NULL )
+        struct edge *x = tree_min(tree->summary);
+        if(x == NULL)
         {
-            if ( tree->min->weight != tree->max->weight )
+            if(tree->min->weight != tree->max->weight)
             {
                 tree->min = tree->max;
                 return 1;
@@ -255,43 +249,43 @@ ll vEB_delete ( vEB *& tree, ll val )
             tree = NULL;
             return 1;
         }
-        ll i = tree_min ( tree->summary)->weight;
-        val = tree->min->weight = index ( tree, i, tree_min(tree->cluster[i])->weight);
+        ll i = tree_min(tree->summary)->weight;
+        ed = tree->min->weight = index(tree, i, tree_min(tree->cluster[i])->weight);
         tree->min->from = tree_min(tree->cluster[i])->from;
         tree->min->to = tree_min(tree->cluster[i])->to;
         
     }
     
-    if ( tree->uni > 2 )
+    if(tree->universe > 2)
     {
-        ll highVal = high ( tree, val );
-        ll lowVal = low ( tree, val );
-        if ( vEB_delete ( tree->cluster[highVal], lowVal) == 0 )
+        ll high_of_x = high(tree, ed);
+        ll low_of_x = low(tree, ed);
+        if ( delete_vEB(tree->cluster[high_of_x], low_of_x) == 0)
         {
             return 0;
         }
-        struct edge  *tmp = tree_min ( tree->cluster[highVal]);
+        struct edge  *tmp = tree_min(tree->cluster[high_of_x]);
         if ( tmp == NULL )
         {
-            if ( vEB_delete ( tree->summary, highVal ) == 0 )
+            if (delete_vEB(tree->summary, high_of_x) == 0)
             {
                 return 0;
             }
         }
     }
     
-    if ( val == tree->max->weight )
+    if (ed == tree->max->weight)
     {
-        struct edge  *x = tree_max ( tree->summary);
-        if ( x == NULL )
+        struct edge  *x = tree_max(tree->summary);
+        if (x == NULL)
         {
             tree->max = tree->min;
             return 1;
         }
         else
         {
-            ll i = tree_max ( tree->summary)->weight;
-            tree->max->weight = index ( tree, i, tree_max(tree->cluster[i])->weight );
+            ll i = tree_max(tree->summary)->weight;
+            tree->max->weight = index(tree, i, tree_max(tree->cluster[i])->weight);
             tree->max->from = tree_max(tree->cluster[i])->from;
             tree->max->to = tree_max(tree->cluster[i])->to;
         }
@@ -299,19 +293,4 @@ ll vEB_delete ( vEB *& tree, ll val )
     return 1;
 }
 
-ll vEB_member ( vEB * tree, ll val )
-{
-    if ( !tree ) return 0;
-    
-    if ( val < 0 || val >= tree->uni ) return 0;
-    if ( tree->min->weight > val || tree->max->weight < val ) return 0;
-    if ( tree->min->weight == val ) return val;
-    if ( !tree->summary )
-    {
-        return tree->max->weight == val;
-    }
-    if ( !vEB_member ( tree->cluster[high ( tree, val )], low ( tree, val ) ) )
-        return 0;
-    return val;
-}
 

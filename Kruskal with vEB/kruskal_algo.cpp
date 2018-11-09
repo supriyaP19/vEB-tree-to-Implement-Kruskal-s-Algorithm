@@ -84,7 +84,7 @@ ll kruskal(struct edges *e,ll g_edges,ll g_nodes)
         u = find(u);
         v = find(v);
         if(u!=v){
-           mst_wt+=e[i].weight;
+           mst_wt = (mst_wt+e[i].weight)%1000000007;
 
            union1(u,v);
    

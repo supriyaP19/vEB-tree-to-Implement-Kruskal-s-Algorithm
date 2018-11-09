@@ -29,32 +29,29 @@ struct edge
 
 struct vEB
 {
-    
-    vEB ( ll uniSize );
-    ~vEB();
-    ll uni;
-    ll uniSqrt;
-    ll lowerUniSqrt;
-    ll higherUniSqrt;
-    struct edge * min;
-    struct edge * max;
+    vEB ( ll universe_size );
+    ll universe;
+    ll universe_sqrt;
+    ll low_universe_sqrt;
+    ll hi_universe_sqrt;
     vEB * summary;
     vEB ** cluster;
-    
+    struct edge * min;
+    struct edge * max;
+    ~vEB();
 };
 
 
 
-ll powTwoRoundUp ( ll val ); //Round up to next higher power of 2
-float lowerSqrt ( ll val );
-float higherSqrt ( ll val );
-ll low ( vEB * tree, ll val );
-ll high ( vEB * tree, ll val );
-ll index ( vEB * tree, ll high, ll low );
+ll nextpower_of_two(ll x); //Round up to next higher power of 2
+ll sqrt_floor(ll x);
+ll sqrt_ceil(ll x);
+ll low(vEB * tree, ll x);
+ll high(vEB * tree, ll x);
+ll index(vEB * tree, ll high, ll low);
+ll insert(vEB *& tree ,ll wt, ll frm , ll t, ll last_universe_sqrt = 0);
+ll insert_vEB(vEB *& tree, struct edge *ed , ll last_universe_sqrt = 0);
+ll delete_vEB(vEB *& tree, ll ed);
 struct edge * tree_min(vEB *tree);
 struct edge * tree_max(vEB *tree);
 struct edge * extract_min(vEB *tree);
-ll insert(vEB *& tree ,ll wt, ll frm , ll t, ll parenrUniSqrt = 131072);
-ll vEB_insert ( vEB *& tree, struct edge *val , ll parentUniSqrt = 131072 );
-ll vEB_delete ( vEB *& tree, ll val );
-ll vEB_member ( vEB * tree, ll val );

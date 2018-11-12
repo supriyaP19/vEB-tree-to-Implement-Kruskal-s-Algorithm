@@ -19,127 +19,129 @@ using namespace std;
 typedef long long lld;
 typedef unsigned long long llu;
 
-struct BinNode
+struct BinomialNode
 {
     int key;
     int degree;
-    BinNode *f, *p, *c;
+    BinomialNode *forward;
+    BinomialNode *parent;
+    BinomialNode *child;
     int  from;
     int to;
     
-    BinNode()
+    BinomialNode()
     {
         this -> key = 0;
         this -> degree = 0;
-        this -> f = this -> p = this -> c = NULL;
+        this -> forward = this -> parent = this -> child = NULL;
         int from = 0;
         int to = 0;
     }
     
-    BinNode(int key,int from,int to)
+    BinomialNode(int key,int from,int to)
     {
         this -> key = key;
         this -> from = from;
         this -> to = to;
         this -> degree = 0;
-        this -> f = this -> p = this -> c = NULL;
+        this -> forward = this -> parent = this -> child = NULL;
     }
 };
 
-class BinHeap
+class BinomialHeap
 {
-    BinNode *roots;
-    BinNode *min;
-    void linkTrees(BinNode*, BinNode*);
-    BinNode* mergeRoots(BinHeap*, BinHeap*);
+    BinomialNode *roots;
+    BinomialNode *min;
+    void linkTrees(BinomialNode*, BinomialNode*);
+    BinomialNode* merge_heap_roots(BinomialHeap*, BinomialHeap*);
     
 public:
-    BinHeap();
-    BinHeap(BinNode*);
-    bool isEmpty();
-    void insert(BinNode*);
-    void merge(BinHeap*);
-    BinNode* first();
-    BinNode* extractMin();
-    void decreaseKey(BinNode*, int);
-    void Delete(BinNode*);
+    BinomialHeap();
+    BinomialHeap(BinomialNode*);
+    bool is_heap_empty();
+    void insert_bin(BinomialNode*);
+    void merge_heap(BinomialHeap*);
+    BinomialNode* first();
+    BinomialNode* extractMin();
+    void decreaseKey(BinomialNode*, int);
+    void Delete(BinomialNode*);
 };
 
-BinHeap::BinHeap()
+BinomialHeap::BinomialHeap()
 {
     this -> roots = NULL;
 }
 
-BinHeap::BinHeap(BinNode *x)
+BinomialHeap::BinomialHeap(BinomialNode *x)
 {
     this -> roots = x;
 }
 
-bool BinHeap::isEmpty()
+bool BinomialHeap::is_heap_empty()
 {
     return (this -> roots == NULL);
 }
 
-void BinHeap::insert(BinNode *x)
+void BinomialHeap::insert_bin(BinomialNode *x)
 {
-    this -> merge(new BinHeap(x));
+    this -> merge_heap(new BinomialHeap(x));
 }
 
-void BinHeap::linkTrees(BinNode *y, BinNode *z)
+void BinomialHeap::linkTrees(BinomialNode *y, BinomialNode *z)
 {
     // Precondition: y -> key >= z -> key
-    y -> p = z;
-    y -> f = z -> c;
-    z -> c = y;
+    y -> parent = z;
+    y -> forward = z -> child;
+    z -> child = y;
     z -> degree = z -> degree + 1;
 }
 
-BinNode* BinHeap::mergeRoots(BinHeap *x, BinHeap *y)
+BinomialNode* BinomialHeap::merge_heap_roots(BinomialHeap *x, BinomialHeap *y)
 {
-    BinNode *ret = new BinNode();
-    BinNode *end = ret;
+    BinomialNode *ret = new BinomialNode();
+    BinomialNode *end = ret;
     
-    BinNode *L = x -> roots;
-    BinNode *R = y -> roots;
+    BinomialNode *L = x -> roots;
+    BinomialNode *R = y -> roots;
     if (L == NULL) return R;
     if (R == NULL) return L;
     while (L != NULL || R != NULL)
     {
         if (L == NULL)
         {
-            end -> f = R;
-            end = end -> f;
-            R = R -> f;
+            end -> forward = R;
+            end = end -> forward;
+            R = R -> forward;
         }
         else if (R == NULL)
         {
-            end -> f = L;
-            end = end -> f;
-            L = L -> f;
+            end -> forward = L;
+            end = end -> forward;
+            L = L -> forward;
         }
         else
         {
             if (L -> degree < R -> degree)
             {
-                end -> f = L;
-                end = end -> f;
-                L = L -> f;
+                end -> forward = L;
+                end = end -> forward;
+                L = L -> forward;
             }
             else
             {
-                end -> f = R;
-                end = end -> f;
-                R = R -> f;
+                end -> forward = R;
+                end = end -> forward;
+                R = R -> forward;
             }
         }
     }
-    return (ret -> f);
+    return (ret -> forward);
 }
 
-void BinHeap::merge(BinHeap *bh)
+void BinomialHeap::merge_heap(BinomialHeap *bh)
 {
-    BinHeap *H = new BinHeap();
-    H -> roots = mergeRoots(this, bh);
+    BinomialHeap *H = new BinomialHeap();
+    H -> roots = merge_heap_roots(this, bh);
     
     if (H -> roots == NULL)
     {
@@ -148,99 +150,99 @@ void BinHeap::merge(BinHeap *bh)
         return;
     }
     
-    BinNode *prevX = NULL;
-    BinNode *x = H -> roots;
-    BinNode *nextX = x -> f;
+    BinomialNode *prevX = NULL;
+    BinomialNode *x = H -> roots;
+    BinomialNode *nextX = x -> forward;
     while (nextX != NULL)
     {
-        if (x -> degree != nextX -> degree || (nextX -> f != NULL && nextX -> f -> degree == x -> degree))
+        if (x -> degree != nextX -> degree || (nextX -> forward != NULL && nextX -> forward -> degree == x -> degree))
         {
             prevX = x;
             x = nextX;
         }
         else if (x -> key <= nextX -> key)
         {
-            x -> f = nextX -> f;
+            x -> forward = nextX -> forward;
             linkTrees(nextX, x);
         }
         else
         {
             if (prevX == NULL) H -> roots = nextX;
-            else prevX -> f = nextX;
+            else prevX -> forward = nextX;
             linkTrees(x, nextX);
             x = nextX;
         }
-        nextX = x -> f;
+        nextX = x -> forward;
     }
     
     this -> roots = H -> roots;
     this -> min = H -> roots;
-    BinNode *cur = this -> roots;
+    BinomialNode *cur = this -> roots;
     while (cur != NULL)
     {
         if (cur -> key < this -> min -> key) this -> min = cur;
-        cur = cur -> f;
+        cur = cur -> forward;
     }
 }
 
-BinNode* BinHeap::first()
+BinomialNode* BinomialHeap::first()
 {
     return this -> min;
 }
 
-BinNode* BinHeap::extractMin()
+BinomialNode* BinomialHeap::extractMin()
 {
-    BinNode *ret = this -> first();
+    BinomialNode *ret = this -> first();
     
     // delete ret from the list of roots
-    BinNode *prevX = NULL;
-    BinNode *x = this -> roots;
+    BinomialNode *prevX = NULL;
+    BinomialNode *x = this -> roots;
     while (x != ret)
     {
         prevX = x;
-        x = x -> f;
+        x = x -> forward;
     }
-    if (prevX == NULL) this -> roots = x -> f;
-    else prevX -> f = x -> f;
+    if (prevX == NULL) this -> roots = x -> forward;
+    else prevX -> forward = x -> forward;
     
     // reverse the list of ret's children
-    BinNode *revChd = NULL;
-    BinNode *cur = ret -> c;
+    BinomialNode *revChd = NULL;
+    BinomialNode *cur = ret -> child;
     while (cur != NULL)
     {
-        BinNode *next = cur -> f;
-        cur -> f = revChd;
+        BinomialNode *next = cur -> forward;
+        cur -> forward = revChd;
         revChd = cur;
         cur = next;
     }
     
-    // merge the two lists
-    BinHeap *H = new BinHeap();
+    // merge_heap the two lists
+    BinomialHeap *H = new BinomialHeap();
     H -> roots = revChd;
-    this -> merge(H);
+    this -> merge_heap(H);
     
     return ret;
 }
 
-void BinHeap::decreaseKey(BinNode *x, int newKey)
+void BinomialHeap::decreaseKey(BinomialNode *x, int newKey)
 {
     // Precondition: x -> key > newKey
     x -> key = newKey;
-    BinNode *y = x;
-    BinNode *z = y -> p;
+    BinomialNode *y = x;
+    BinomialNode *z = y -> parent;
     while (z != NULL && y -> key < z -> key)
     {
         // swap contents
         swap(y -> key, z -> key);
         
         y = z;
-        z = y -> p;
+        z = y -> parent;
     }
     
     if (y -> key < this -> min -> key) this -> min = y;
 }
 
-void BinHeap::Delete(BinNode *x)
+void BinomialHeap::Delete(BinomialNode *x)
 {
     decreaseKey(x, -INF);
     extractMin();
@@ -248,16 +250,16 @@ void BinHeap::Delete(BinNode *x)
 
 int main()
 {    srand(time(0));
-    BinHeap *bh = new BinHeap();
+    BinomialHeap *bh = new BinomialHeap();
     
-    // BinNode *x = new BinNode(11);
-    // BinNode *y = new BinNode(5);
+    // BinomialNode *x = new BinomialNode(11);
+    // BinomialNode *y = new BinomialNode(5);
     
-    // bh -> insert(x);
-    // bh -> insert(y);
-    // bh -> insert(new BinNode(3));
-    // bh -> insert(new BinNode(8));
-    // bh -> insert(new BinNode(4));
+    // bh -> insert_bin(x);
+    // bh -> insert_bin(y);
+    // bh -> insert_bin(new BinomialNode(3));
+    // bh -> insert_bin(new BinomialNode(8));
+    // bh -> insert_bin(new BinomialNode(4));
     
     // bh -> decreaseKey(x, 2);
 
@@ -280,12 +282,12 @@ int main()
         cin >> g_from[i] >> g_to[i] >> g_weight[i];
         
         if(map_of_edge.find(g_weight[i])==map_of_edge.end()){
-            bh -> insert(new BinNode(g_weight[i],g_from[i],g_to[i]));
+            bh -> insert_bin(new BinomialNode(g_weight[i],g_from[i],g_to[i]));
         }
         //inserting the weight in the temporary unoredered map if it's the first time this edge is encountered else inserting the multimap to handle duplicates
         pair<int,int>from_to = make_pair(g_from[i],g_to[i]);
         map_of_edge.insert({g_weight[i], from_to});
-       // map_of_edge.insert({g_weight[i],new_e});
+       // map_of_edge.insert_bin({g_weight[i],new_e});
         
         
        
@@ -295,7 +297,7 @@ int main()
 
     int y=0;
     struct edges new_e[g_edges+1];
-    while (!bh -> isEmpty())
+    while (!bh -> is_heap_empty())
     {
         int x = bh -> extractMin() -> key;
 
